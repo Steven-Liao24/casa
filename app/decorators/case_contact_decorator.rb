@@ -133,6 +133,10 @@ class CaseContactDecorator < Draper::Decorator
     "Case contact created at #{I18n.l(created_at, format: :time_on_date)}, was successfully updated."
   end
 
+  def case_court_topics
+   ContactTopic.select(:question).joins(contact_topic_answers: {case_contact: :casa_case}).where("casa_cases.id": object.casa_case.id)
+  end
+
   private
 
   def formatted_hours_and_minutes(minutes)

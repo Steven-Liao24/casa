@@ -3,10 +3,19 @@ require "csv"
 class CaseContactsExportCsvService
   attr_reader :case_contacts, :filtered_columns
 
-  def initialize(case_contacts, filtered_columns = nil)
-    @filtered_columns = filtered_columns || CaseContactsExportCsvService.DATA_COLUMNS.keys
+  def initialize(case_contacts, columns = nil)
+    @filtered_columns = filter_columns(columns)
 
     @case_contacts = case_contacts.preload({creator: :supervisor}, :contact_types, :casa_case)
+  end
+
+  def filter_columns(columns)
+    if columns.include?(:court_topics)
+      court_topics = case_contacts.has_court_topics
+    cols = columns || CaseContactsExportCsvService.DATA_COLUMNS.keys
+    cols.delete(:court_topics)
+    cols+=court_topics
+    end
   end
 
   def perform
@@ -37,7 +46,8 @@ class CaseContactsExportCsvService
       creator_email: case_contact&.creator&.email,
       creator_name: case_contact&.creator&.display_name,
       supervisor_name: case_contact&.creator&.supervisor&.display_name,
-      case_contact_notes: case_contact&.notes
-    }
+      case_contact_notes: case_contact&.notes, 
+      court_topics: case_contact&.case_court_topics&.flat_map { |topic| topic},
+  }
   end
 end

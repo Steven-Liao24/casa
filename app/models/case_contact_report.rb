@@ -14,7 +14,8 @@ class CaseContactReport
   private
 
   def filtered_case_contacts(args)
-    CaseContact
+    
+    temp = CaseContact
       .supervisors(args[:supervisor_ids])
       .creators(args[:creator_ids])
       .casa_org(args[:casa_org_id])
@@ -25,6 +26,8 @@ class CaseContactReport
       .contact_type(args[:contact_type_ids])
       .contact_type_groups(args[:contact_type_group_ids])
       .with_casa_case(args[:casa_case_ids])
+      .has_court_topics()
+      temp
   end
 
   def filtered_columns(args)
