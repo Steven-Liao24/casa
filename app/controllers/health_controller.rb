@@ -21,7 +21,7 @@ class HealthController < ApplicationController
   end
 
   def monthly_line_graph_data
-    first_day_of_last_12_months = (12.months.ago.to_date..Date.current).select { |date| date.day == 1 }.map { |date| date.beginning_of_month }
+    first_day_of_last_12_months = (12.months.ago.to_date..Date.current).select { |date| date.day == 1 }.map { |date| date.beginning_of_month }[0..11]
 
     monthly_counts_of_case_contacts_created = CaseContact.group_by_month(:created_at, last: 12).count
     monthly_counts_of_case_contacts_with_notes_created = CaseContact.left_outer_joins(:contact_topic_answers).where("case_contacts.notes != '' OR contact_topic_answers.value != ''").select(:id).distinct.group_by_month(:created_at, last: 12).count
