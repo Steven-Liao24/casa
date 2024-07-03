@@ -167,31 +167,35 @@
             <span class="d-inline" data-select-all-target="buttonLabel"></span>
           </button>
         </div>
-        <div class="table-responsive">
+        <form data-turbo-frame="volunteers" data-turbo-action="advance" action="/volunteers" accept-charset="UTF-8" method="get">
+          <div class="input-style-1">
+            <label for="search" class="sr-only">Search</label>
+            <input id="search" name="search" value="<%= params[:search] %>" oninput="this.form.requestSubmit()" autocomplete="off" placeholder="Search for volunteers" type="search">
+          </div>
+        </form>
+        <%= turbo_frame_tag "volunteers", class: "table-responsive" do %>
           <%= form_with(url: bulk_assignment_supervisor_volunteers_path, id: "form-bulk-assignment", data: { controller: "disable-form", "disable-form-unallowed-value": '["unselected"]', "disable-form-disabled-class": "deactive-btn", "disable-form-enabled-class": "btn-hover dark-btn" }) do |form| %>
-            <table
-              class="table hover"
-              id="volunteers"
-              data-source="<%= datatable_volunteers_path format: :json %>">
+            <table class="table hover">
               <thead>
               <tr>
                 <th>
                   <input type="checkbox" class="form-check-input" data-select-all-target="checkboxAll" data-action="select-all#toggleAll">
                 </th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Supervisor</th>
-                <th>Status</th>
-                <th>Assigned To Transition Aged Youth</th>
-                <th>Case Number(s)</th>
-                <th>Last Attempted Contact</th>
-                <th>Contacts Made in Past 60 Days</th>
-                <th>Hours spent in last 30 days</th>
-                <th>Extra Languages</th>
-                <th>Actions</th>
+                <%= render(Table::HeaderComponent.new(title: "Name", method: "display_name", base_path: "volunteers")) %>
+                <%= render(Table::HeaderComponent.new(title: "Email", method: "email", base_path: "volunteers")) %>
+                <%= render(Table::HeaderComponent.new(title: "Supervisor", method: "supervisor_name", base_path: "volunteers")) %>
+                <%= render(Table::HeaderComponent.new(title: "Status")) %>
+                <%= render(Table::HeaderComponent.new(title: "Assigned To Transition Aged Youth")) %>
+                <%= render(Table::HeaderComponent.new(title: "Case Number(s)")) %>
+                <%= render(Table::HeaderComponent.new(title: "Last Attempted Contact", method: "last_case_contact_occurred_at", base_path: "volunteers")) %>
+                <%= render(Table::HeaderComponent.new(title: "Contacts Made in Past #{Volunteer::CONTACT_MADE_IN_PAST_DAYS_NUM} Days", method: "contacts_made_recently", base_path: "volunteers")) %>
+                <%= render(Table::HeaderComponent.new(title: "Hours Spent in Past #{Volunteer::HOURS_SPENT_IN_PAST_DAYS_NUM} Days", method: "hours_spent_recently", base_path: "volunteers")) %>
+                <%= render(Table::HeaderComponent.new(title: "Extra Languages")) %>
+                <%= render(Table::HeaderComponent.new(title: "Actions")) %>
               </tr>
               </thead>
               <tbody>
+                <%= render VolunteerDecorator.decorate_collection(@volunteers), form: form %>
               </tbody>
             </table>
 
@@ -210,18 +214,18 @@
                     </div>
                     <div class="modal-body px-0">
                       <div class="mb-30">
-                       <div class="select-style-1">
-                        <label for='supervisor_volunteer_supervisor_id'>
-                           Choose a new supervisor from the dropdown below to reassign selected volunteers. Once you're ready, click the "Confirm" button to apply the changes.
-                        </label>
-                        <select name='supervisor_volunteer[supervisor_id]' id="supervisor_volunteer_supervisor_id" class='supervisor-bulk-assignment form-control' required="required" data-disable-form-target="input" data-action="disable-form#validate">
-                          <option value="unselected">Choose a supervisor</option>
-                          <option value="">None</option>
-                          <% @supervisors&.active&.each do |supervisor| %>
-                            <option value="<%= supervisor.id %>"><%= supervisor.display_name %></option>
-                          <% end %>
-                       </select>
-                       </div>
+                        <div class="select-style-1">
+                          <label for='supervisor_volunteer_supervisor_id'>
+                            Choose a new supervisor from the dropdown below to reassign selected volunteers. Once you're ready, click the "Confirm" button to apply the changes.
+                          </label>
+                          <select name='supervisor_volunteer[supervisor_id]' id="supervisor_volunteer_supervisor_id" class='supervisor-bulk-assignment form-control' required="required" data-disable-form-target="input" data-action="disable-form#validate">
+                            <option value="unselected">Choose a supervisor</option>
+                            <option value="">None</option>
+                            <% @supervisors&.active&.each do |supervisor| %>
+                              <option value="<%= supervisor.id %>"><%= supervisor.display_name %></option>
+                            <% end %>
+                          </select>
+                        </div>
                       </div>
                       <div class="action d-flex flex-wrap justify-content-end">
                         <button
@@ -240,8 +244,9 @@
               </div>
             </div>
           <% end %>
-        </div>
+        <% end %>
       </div>
+    </div>
   </div>
   </div>
 

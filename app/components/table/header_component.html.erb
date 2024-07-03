@@ -1,0 +1,14 @@
+<th class="text-center">
+  <span class="mx-2">
+    <% if @path %>
+    <%= link_to @title, @path %>
+      <% if params[:order] == @method && @ascending %>
+      <i class="fa fa-caret-up"></i>
+    <% elsif params[:order] == @method %>
+      <i class="fa fa-caret-down"></i>
+    <% end %>
+  <% else %>
+    <%= @title %>
+  <% end %>
+  </span>
+</th>

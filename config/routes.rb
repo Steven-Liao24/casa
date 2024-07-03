@@ -152,6 +152,8 @@ Rails.application.routes.draw do
       patch :unassign
     end
   end
+
+  get :volunteers_table, to: "volunteers#volunteers_table"
   resources :volunteers, except: %i[destroy], concerns: %i[with_datatable] do
     post :stop_impersonating, on: :collection
     member do

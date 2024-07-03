@@ -1,0 +1,19 @@
+<tr>
+  <td>
+    <input type="checkbox" name="supervisor_volunteer[volunteer_ids][]" data-checkbox-select-all-target="checkbox" value="<%= volunteer.id %>" class="form-check-input">
+  </td>
+  <td><%= link_to volunteer.display_name, volunteer, data: { turbo: false } %></td>
+  <td><%= volunteer.email %></td>
+  <td><%= volunteer.supervisor.display_name %></td>
+  <td><%= volunteer.status_text %></td>
+  <td><%= volunteer.transition_youth_text %></td>
+  <td><%= volunteer.casa_case_links %></td>
+  <td><%= volunteer.last_attempted_contact_link %></td>
+  <td><%= volunteer.contacts_made_recently %></td>
+  <td><%= volunteer.hours_spent_recently %></td>
+  <td><%= volunteer.extra_languages_text %></td>
+  <td>
+    <%= link_to "Edit", edit_volunteer_path(volunteer), class: "btn btn-primary text-white", data: { turbo: false } %>
+    <%= link_to "Impersonate", impersonate_volunteer_path(volunteer), class: "btn btn-secondary text-white", data: { turbo: false } %>
+  </td>
+</tr>

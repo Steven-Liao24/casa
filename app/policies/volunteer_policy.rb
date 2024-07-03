@@ -33,6 +33,10 @@ class VolunteerPolicy < UserPolicy
     admin_or_supervisor_or_volunteer?
   end
 
+  def volunteers_table?
+    index?
+  end
+
   alias_method :datatable?, :index?
   alias_method :new?, :admin_or_supervisor_same_org?
   alias_method :create?, :admin_or_supervisor_same_org?

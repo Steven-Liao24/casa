@@ -45,6 +45,7 @@ gem "scout_apm"
 gem "sprockets-rails" # The original asset pipeline for Rails [https://github.com/rails/sprockets-rails]
 gem "stimulus-rails"
 gem "strong_migrations"
+gem "turbo-rails"
 gem "tzinfo-data", platforms: %i[mingw mswin x64_mingw jruby] # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "wicked"
 gem "rswag-api"
@@ -95,3 +96,6 @@ group :test do
 end
 
 # gem "pdf-reader", "~> 2.9"
+
+# Use Redis for Action Cable
+gem "redis", "~> 4.0"

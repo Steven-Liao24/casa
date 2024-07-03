@@ -12,11 +12,25 @@ class Volunteer < User
   CASE_NUMBER_COLUMN = "case_number"
   LAST_ATTEMPTED_CONTACT_COLUMN = "last_attempted_contact"
   CONTACT_MADE_IN_PAST_DAYS_NUM = 60
+  HOURS_SPENT_IN_PAST_DAYS_NUM = 30
   CONTACT_MADE_IN_PAST_DAYS_COLUMN = "contact_made_in_past_#{CONTACT_MADE_IN_PAST_DAYS_NUM}_days".freeze
   HOURS_SPENT_IN_DAYS_COLUMN = "hours_spent_in_days"
   EXTRA_LANGUAGES_COLUMN = "has_any_extra_languages"
   ACTIONS_COLUMN = "actions"
   TABLE_COLUMNS = [
+    # { title: "Name", method: "display_name" },
+    # { title: "Email", method: "email" },
+    # { title: "Supervisor", method: "supervisor_name" },
+    # { title: "Status", method: "status_text" },
+    # { title: "Assigned To Transition Aged Youth", method: "transition_youth_text" },
+    # { title: "Case Number(s)", method: "casa_case_links" },
+    # { title: "Status", method: "status_text" },
+    # { title: "Status", method: "status_text" },
+    # { title: "Status", method: "status_text" },
+    # { title: "Status", method: "status_text" },
+    # { title: "Status", method: "status_text" },
+
+
     BULK_COLUMN,
     NAME_COLUMN,
     EMAIL_COLUMN,
@@ -51,8 +65,9 @@ class Volunteer < User
     joins(:case_assignments)
       .where("case_assignments.active is true")
       .distinct
-      .order(:display_name)
   }
+
+  scope :with_languages, -> { joins(:languages) }
 
   scope :with_no_assigned_cases, -> {
                                    joins("left join case_assignments " \
@@ -67,6 +82,8 @@ class Volunteer < User
     where("EXTRACT(month from date_of_birth) = ?", DateTime.current.next_month.month)
   }
 
+  scope :ordered, ->(column) { to_a.sort_by { |v| v.send(column) } }
+
   def self.send_court_report_reminder
     active.includes(:case_assignments).where.not(case_assignments: nil).find_each do |volunteer|
       volunteer.case_assignments.active.each do |case_assignment|
@@ -78,6 +95,10 @@ class Volunteer < User
         end
       end
     end
+  end
+
+  def self.search(query)
+    where('display_name ILIKE ?', "%#{query}%")
   end
 
   # Activates this volunteer.
@@ -135,6 +156,30 @@ class Volunteer < User
     total_minutes = year_duration.map(&:last).reduce(:+) || 0
     total_duration = total_minutes + total_hours * 60
     "#{total_duration / 60}h #{total_duration % 60}min"
+  end
+
+  def last_case_contact
+    case_contacts.where.not(casa_case_id: nil).order(occurred_at: :desc).first
+  end
+
+  def last_case_contact_occurred_at
+    last_case_contact&.occurred_at.to_i
+  end
+
+  def supervisor_name
+    supervisor.display_name
+  end
+
+  def contacts_made_recently
+    case_contacts.where(contact_made: true, occurred_at: Volunteer::CONTACT_MADE_IN_PAST_DAYS_NUM.days.ago.to_date..).count
+  end
+
+  def hours_spent_recently
+    case_contacts.where(contact_made: true, occurred_at: Volunteer::HOURS_SPENT_IN_PAST_DAYS_NUM.days.ago.to_date..).sum(:duration_minutes)
+  end
+
+  def extra_languages
+    languages.map(&:name)
   end
 
   private

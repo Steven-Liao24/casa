@@ -1,12 +1,17 @@
 class VolunteersController < ApplicationController
   include SmsBodyHelper
 
-  before_action :set_volunteer, except: %i[index new create datatable stop_impersonating]
+  before_action :set_volunteer, except: %i[index new create datatable stop_impersonating volunteers_table]
   after_action :verify_authorized, except: %i[stop_impersonating]
 
   def index
     authorize Volunteer
+    puts "PARAMS: #{params}"
     @supervisors = policy_scope(current_organization.supervisors)
+    @volunteers = policy_scope(current_organization.volunteers.includes(:languages, :supervisor).with_assigned_cases)
+    @volunteers = @volunteers.search(params[:search]) if params[:search]
+    @volunteers = @volunteers.ordered(params[:order]) if params[:order]
+    @volunteers = @volunteers.reverse if ![nil, "true"].include?(params[:asc])
   end
 
   def show
